@@ -9,7 +9,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import androidx.test.espresso.action.ViewActions;
@@ -23,48 +22,50 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class MainActivityTest {
+public class ShowActivityTest {
+
     @Rule
-    public ActivityScenarioRule<MainActivity> scenario = new ActivityScenarioRule<MainActivity>(MainActivity.class);
+    public ActivityScenarioRule<MainActivity> scenario = new ActivityScenarioRule<>(MainActivity.class);
 
     @Test
-    public void testAddCity(){
-        // Click on Add City button
+    public void testActivitySwitchedToShowActivity() {
         onView(withId(R.id.button_add)).perform(click());
-        // Type "Edmonton" in the editText
         onView(withId(R.id.editText_name)).perform(ViewActions.typeText("Edmonton"));
-        // Click on Confirm
         onView(withId(R.id.button_confirm)).perform(click());
-        // Check if text "Edmonton" is matched with any of the te displayed on the screen
-        onView(withText("Edmonton")).check(matches(isDisplayed()));
+
+        onData(is("Edmonton")).inAdapterView(withId(R.id.city_list)).atPosition(0).perform(click());
+
+        onView(withId(R.id.text_city_name)).check(matches(isDisplayed()));
     }
 
     @Test
-    public void testClearCity(){
-    // Add first city to the list
+    public void testCityNameIsConsistentOnShowActivity() {
         onView(withId(R.id.button_add)).perform(click());
         onView(withId(R.id.editText_name)).perform(ViewActions.typeText("Edmonton"));
-                onView(withId(R.id.button_confirm)).perform(click());
-    //Add another city to the list
+        onView(withId(R.id.button_confirm)).perform(click());
+
         onView(withId(R.id.button_add)).perform(click());
         onView(withId(R.id.editText_name)).perform(ViewActions.typeText("Vancouver"));
-                onView(withId(R.id.button_confirm)).perform(click());
-    //Clear the list
-        onView(withId(R.id.button_clear)).perform(click());
-        onView(withText("Edmonton")).check(doesNotExist());
-        onView(withText("Vancouver")).check(doesNotExist());
-    }
+        onView(withId(R.id.button_confirm)).perform(click());
 
+        onData(is("Vancouver")).inAdapterView(withId(R.id.city_list)).atPosition(1).perform(click());
+
+        onView(withId(R.id.text_city_name)).check(matches(withText("Vancouver")));
+    }
 
     @Test
-    public void testListView(){
-
+    public void testBackButtonReturnsToMainActivity() {
         onView(withId(R.id.button_add)).perform(click());
         onView(withId(R.id.editText_name)).perform(ViewActions.typeText("Edmonton"));
-                onView(withId(R.id.button_confirm)).perform(click());
+        onView(withId(R.id.button_confirm)).perform(click());
 
-        onData(is(instanceOf(String.class))).inAdapterView(withId(R.id.city_list
-        )).atPosition(0).check(matches((withText("Edmonton"))));
+        onData(is("Edmonton")).inAdapterView(withId(R.id.city_list)).atPosition(0).perform(click());
+
+        onView(withId(R.id.button_back)).perform(click());
+
+        onView(withId(R.id.city_list)).check(matches(isDisplayed()));
+        onView(withId(R.id.text_city_name)).check(doesNotExist());
     }
-
 }
+
+
